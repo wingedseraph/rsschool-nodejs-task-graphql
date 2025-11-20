@@ -13,6 +13,7 @@ import { MemberType, MemberTypeId } from './types/member.types.js';
 import { PrismaClient } from '@prisma/client';
 import { UserType } from './types/user.types.js';
 import { UUIDType } from './types/uuid.js';
+import { PostType } from './types/posts.types.js';
 const prisma = new PrismaClient();
 
 export const RootQueryType = new GraphQLObjectType({
@@ -41,6 +42,18 @@ export const RootQueryType = new GraphQLObjectType({
       },
       resolve: async (_, { id }: { id: string }) =>
         prisma.user.findUnique({ where: { id } }),
+    },
+    posts: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PostType))),
+      resolve: async () => prisma.post.findMany(),
+    },
+    post: {
+      type: PostType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (_, { id }: { id: string }) =>
+        prisma.post.findUnique({ where: { id } }),
     },
   },
 });

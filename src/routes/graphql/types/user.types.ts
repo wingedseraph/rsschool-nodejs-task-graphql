@@ -9,6 +9,7 @@ import {
 } from 'graphql';
 import { UUIDType } from './uuid.js';
 import { MemberType } from './member.types.js';
+import { PostType } from './posts.types.js';
 
 export const ProfileType = new GraphQLObjectType({
   name: 'ProfileType',
@@ -17,15 +18,6 @@ export const ProfileType = new GraphQLObjectType({
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
     yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
     memberType: { type: new GraphQLNonNull(MemberType) },
-  }),
-});
-
-export const PostType = new GraphQLObjectType({
-  name: 'PostType',
-  fields: () => ({
-    id: { type: new GraphQLNonNull(UUIDType) },
-    title: { type: new GraphQLNonNull(GraphQLString) },
-    content: { type: new GraphQLNonNull(GraphQLString) },
   }),
 });
 
