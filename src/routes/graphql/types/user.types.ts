@@ -1,4 +1,4 @@
-import { Post, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import {
   GraphQLFloat,
   GraphQLList,
@@ -30,11 +30,12 @@ export const UserType = new GraphQLObjectType({
     },
     posts: {
       type: new GraphQLNonNull(new GraphQLList(PostType)),
-      resolve: async (source: User, _args, ctx: GraphQLContext): Promise<Post[]> => {
+      resolve: async (source: User, _args, ctx: GraphQLContext) => {
         const user = await ctx.prisma.user.findUnique({
           where: { id: source.id },
           include: { posts: true },
         });
+
         return user?.posts || [];
       },
     },
@@ -46,7 +47,8 @@ export const UserType = new GraphQLObjectType({
           where: { subscriberId: source.id },
           include: { author: true },
         });
-        return subscriptions.map((sub) => sub.author);
+
+        return subscriptions.map((user) => user.author);
       },
     },
     subscribedToUser: {
@@ -56,7 +58,8 @@ export const UserType = new GraphQLObjectType({
           where: { authorId: source.id },
           include: { subscriber: true },
         });
-        return subscribers.map((sub) => sub.subscriber);
+
+        return subscribers.map((user) => user.subscriber);
       },
     },
   }),
