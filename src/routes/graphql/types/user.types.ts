@@ -4,6 +4,7 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLOutputType,
   GraphQLString,
 } from 'graphql';
 import { GraphQLContext } from '../context.js';
@@ -11,7 +12,7 @@ import { PostType } from './posts.types.js';
 import { ProfileType } from './profiles.types.js';
 import { UUIDType } from './uuid.js';
 
-export const UserType = new GraphQLObjectType({
+export const UserType: GraphQLOutputType = new GraphQLObjectType({
   name: 'UserType',
   fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
