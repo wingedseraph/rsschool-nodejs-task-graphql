@@ -4,7 +4,7 @@ import depthLimit from 'graphql-depth-limit';
 import { schema } from './graphql-schema.js';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 
-const DEPTH_LIMIT = 5;
+const DEPTH_LIMIT = 5 as const;
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
