@@ -9,6 +9,7 @@ import {
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { GraphQLContext } from './context.js';
 import { Subs } from './loaders.js';
+import { MemberType, MemberTypeId } from './types/member.types.js';
 import {
   ChangePostInput,
   ChangeProfileInput,
@@ -21,8 +22,6 @@ import { PostType } from './types/posts.types.js';
 import { ProfileType } from './types/profiles.types.js';
 import { UserType } from './types/user.types.js';
 import { UUIDType } from './types/uuid.js';
-import { MemberType, MemberTypeId } from './types/member.types.js';
-
 export const schema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'RootQueryType',
@@ -33,14 +32,12 @@ export const schema = new GraphQLSchema({
           return ctx.prisma.memberType.findMany();
         },
       },
-
       posts: {
         type: new GraphQLList(PostType),
         resolve(_source, _args, ctx: GraphQLContext) {
           return ctx.prisma.post.findMany();
         },
       },
-
       users: {
         type: new GraphQLList(UserType),
         resolve: async (_source, _args, ctx: GraphQLContext, resolveInfo) => {
@@ -86,66 +83,42 @@ export const schema = new GraphQLSchema({
           return users;
         },
       },
-
       profiles: {
         type: new GraphQLList(ProfileType),
         resolve: (_source, _args, ctx: GraphQLContext) => {
           return ctx.prisma.profile.findMany();
         },
       },
-
       memberType: {
         type: MemberType,
-        args: {
-          id: {
-            type: new GraphQLNonNull(MemberTypeId),
-          },
-        },
+        args: { id: { type: new GraphQLNonNull(MemberTypeId) } },
         resolve: (_source, { id }: { id: string }, ctx: GraphQLContext) => {
           return ctx.prisma.memberType.findUnique({ where: { id } });
         },
       },
-
       post: {
         type: PostType,
-        args: {
-          id: {
-            type: new GraphQLNonNull(UUIDType),
-          },
-        },
+        args: { id: { type: new GraphQLNonNull(UUIDType) } },
         resolve: (_source, { id }: { id: string }, ctx: GraphQLContext) => {
           return ctx.prisma.post.findUnique({ where: { id } });
         },
       },
-
       user: {
         type: UserType,
-        args: {
-          id: {
-            type: new GraphQLNonNull(UUIDType),
-          },
-        },
+        args: { id: { type: new GraphQLNonNull(UUIDType) } },
         resolve: (_source, { id }: { id: string }, ctx: GraphQLContext) => {
           return ctx.loaders.loadUsers.load(id);
         },
       },
-
       profile: {
         type: ProfileType,
-        args: {
-          id: {
-            type: new GraphQLNonNull(UUIDType),
-          },
-        },
+        args: { id: { type: new GraphQLNonNull(UUIDType) } },
         resolve: (_source, { id }: { id: string }, ctx: GraphQLContext) => {
-          return ctx.prisma.profile.findUnique({
-            where: { id },
-          });
+          return ctx.prisma.profile.findUnique({ where: { id } });
         },
       },
     },
   }),
-
   mutation: new GraphQLObjectType({
     name: 'RootMutationType',
     fields: {
@@ -160,7 +133,6 @@ export const schema = new GraphQLSchema({
           return ctx.prisma.user.create({ data: dto });
         },
       },
-
       createPost: {
         type: PostType,
         args: { dto: { type: new GraphQLNonNull(CreatePostInput) } },
@@ -172,7 +144,6 @@ export const schema = new GraphQLSchema({
           return ctx.prisma.post.create({ data: dto });
         },
       },
-
       createProfile: {
         type: ProfileType,
         args: { dto: { type: new GraphQLNonNull(CreateProfileInput) } },
@@ -193,7 +164,6 @@ export const schema = new GraphQLSchema({
           return ctx.prisma.profile.create({ data: dto });
         },
       },
-
       deleteUser: {
         type: GraphQLString,
         args: { id: { type: new GraphQLNonNull(UUIDType) } },
@@ -204,7 +174,6 @@ export const schema = new GraphQLSchema({
           return null;
         },
       },
-
       deletePost: {
         type: GraphQLString,
         args: { id: { type: new GraphQLNonNull(UUIDType) } },
@@ -214,7 +183,6 @@ export const schema = new GraphQLSchema({
           return null;
         },
       },
-
       deleteProfile: {
         type: GraphQLString,
         args: { id: { type: new GraphQLNonNull(UUIDType) } },
@@ -224,7 +192,6 @@ export const schema = new GraphQLSchema({
           return null;
         },
       },
-
       changeUser: {
         type: UserType,
         args: {
@@ -240,22 +207,16 @@ export const schema = new GraphQLSchema({
           return ctx.prisma.user.update({ where: { id }, data: dto });
         },
       },
-
       changePost: {
         type: PostType,
         args: {
           id: { type: new GraphQLNonNull(UUIDType) },
           dto: { type: new GraphQLNonNull(ChangePostInput) },
         },
-        resolve(
-          _source,
-          { id, dto }: { id: string; dto: { title: string; content: string } },
-          ctx: GraphQLContext,
-        ) {
+        resolve(_source, { id, dto }: { id: string; dto: { title: string; content: string } }, ctx: GraphQLContext,) {
           return ctx.prisma.post.update({ where: { id }, data: dto });
         },
       },
-
       changeProfile: {
         type: ProfileType,
         args: {
@@ -269,18 +230,13 @@ export const schema = new GraphQLSchema({
             dto,
           }: {
             id: string;
-            dto: {
-              isMale: boolean;
-              yearOfBirth: number;
-              memberTypeId: string;
-            };
+            dto: { isMale: boolean; yearOfBirth: number; memberTypeId: string };
           },
           ctx: GraphQLContext,
         ) {
           return ctx.prisma.profile.update({ where: { id }, data: dto });
         },
       },
-
       subscribeTo: {
         type: GraphQLString,
         args: {
@@ -294,14 +250,10 @@ export const schema = new GraphQLSchema({
         ) => {
           ctx.loaders.loadUsers.clear(userId);
           await ctx.prisma.subscribersOnAuthors.create({
-            data: {
-              subscriberId: userId,
-              authorId: authorId,
-            },
+            data: { subscriberId: userId, authorId: authorId },
           });
         },
       },
-
       unsubscribeFrom: {
         type: GraphQLString,
         args: {
@@ -315,12 +267,7 @@ export const schema = new GraphQLSchema({
         ) => {
           ctx.loaders.loadUsers.clear(userId);
           await ctx.prisma.subscribersOnAuthors.delete({
-            where: {
-              subscriberId_authorId: {
-                subscriberId: userId,
-                authorId,
-              },
-            },
+            where: { subscriberId_authorId: { subscriberId: userId, authorId } },
           });
         },
       },
