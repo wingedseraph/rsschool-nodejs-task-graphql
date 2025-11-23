@@ -3,6 +3,7 @@ import { graphql, parse, validate } from 'graphql';
 import depthLimit from 'graphql-depth-limit';
 import { schema } from './graphql-schema.js';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
+import { createLoaders } from './loaders.js';
 
 const DEPTH_LIMIT = 5 as const;
 
@@ -25,11 +26,14 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       if (depthValidationErrors.length > 0) {
         return { data: null, errors: depthValidationErrors };
       }
+
+      const loaders = createLoaders(prisma);
+
       return graphql({
         schema,
         source: query,
         variableValues: variables,
-        contextValue: { prisma },
+        contextValue: { prisma, loaders },
       });
     },
   });

@@ -8,6 +8,8 @@ import {
   GraphQLString,
 } from 'graphql';
 import { GraphQLContext } from '../context.js';
+import { SubsId } from '../loaders.js';
+import { MemberType } from './member.types.js';
 import { PostType } from './posts.types.js';
 import { ProfileType } from './profiles.types.js';
 import { UUIDType } from './uuid.js';
@@ -21,46 +23,56 @@ export const UserType: GraphQLOutputType = new GraphQLObjectType({
     profile: {
       type: ProfileType,
       resolve: async (source: User, _args, ctx: GraphQLContext) => {
-        const user = await ctx.prisma.user.findUnique({
-          where: { id: source.id },
-          include: { profile: true },
-        });
-
-        return user?.profile || null;
+        return ctx.loaders.loadProfiles.load(source.id);
       },
     },
     posts: {
       type: new GraphQLNonNull(new GraphQLList(PostType)),
       resolve: async (source: User, _args, ctx: GraphQLContext) => {
-        const user = await ctx.prisma.user.findUnique({
-          where: { id: source.id },
-          include: { posts: true },
-        });
-
-        return user?.posts || [];
+        return ctx.loaders.loadPosts.load(source.id);
       },
     },
 
     userSubscribedTo: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (source: User, _args, ctx: GraphQLContext) => {
-        const subscriptions = await ctx.prisma.subscribersOnAuthors.findMany({
-          where: { subscriberId: source.id },
-          include: { author: true },
-        });
+        const subscriptions = (await ctx.loaders.loadUserSubscribedTo.load(
+          source.id,
+        )) as SubsId[];
 
-        return subscriptions.map((user) => user.author);
+        if (!subscriptions || subscriptions.length === 0) return [];
+
+        const authorIds = subscriptions.map((sub) => sub.authorId);
+        const users = await Promise.all(
+          authorIds.map((id) => ctx.loaders.loadUsers.load(id)),
+        );
+
+        return users.filter((user) => user !== null);
       },
     },
     subscribedToUser: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (source: User, _args, ctx: GraphQLContext) => {
-        const subscribers = await ctx.prisma.subscribersOnAuthors.findMany({
-          where: { authorId: source.id },
-          include: { subscriber: true },
-        });
+        const subscriptions = (await ctx.loaders.loadSubscribedToUser.load(
+          source.id,
+        )) as SubsId[];
 
-        return subscribers.map((user) => user.subscriber);
+        if (!subscriptions || subscriptions.length === 0) return [];
+
+        const subscriberIds = subscriptions.map((sub) => sub.subscriberId);
+        const users = await Promise.all(
+          subscriberIds.map((id) => ctx.loaders.loadUsers.load(id)),
+        );
+
+        return users.filter((user): user is User => user !== null);
+      },
+    },
+    memberType: {
+      type: MemberType,
+      resolve: async (source: User, _args, ctx: GraphQLContext) => {
+        const profile = await ctx.loaders.loadProfiles.load(source.id);
+        if (!profile) return null;
+        return ctx.loaders.loadMemberTypes.load(profile.memberTypeId);
       },
     },
   }),
