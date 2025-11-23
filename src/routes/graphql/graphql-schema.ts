@@ -62,12 +62,14 @@ export const schema = new GraphQLSchema({
           users.forEach((user) => {
             userMap.set(user.id, user);
             if (includeArgs.userSubscribedTo) {
+              ctx.loaders.loadUserSubscribedTo.prime(user.id, user.userSubscribedTo || []);
               user.userSubscribedTo.forEach(({ authorId }) => {
                 idsToPrime.add(authorId);
               });
             }
 
             if (includeArgs.subscribedToUser) {
+              ctx.loaders.loadSubscribedToUser.prime(user.id, user.subscribedToUser || []);
               user.subscribedToUser?.forEach(({ subscriberId }) => {
                 idsToPrime.add(subscriberId);
               });
