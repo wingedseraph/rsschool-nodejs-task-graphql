@@ -1,4 +1,4 @@
-import {  User } from '@prisma/client';
+import { User } from '@prisma/client';
 import {
   GraphQLList,
   GraphQLNonNull,
@@ -282,28 +282,22 @@ export const schema = new GraphQLSchema({
       },
 
       subscribeTo: {
-        type: UserType,
+        type: GraphQLString,
         args: {
           userId: { type: new GraphQLNonNull(UUIDType) },
           authorId: { type: new GraphQLNonNull(UUIDType) },
         },
-        resolve(
+        resolve: async (
           _source,
           { userId, authorId }: { userId: string; authorId: string },
           ctx: GraphQLContext,
-        ) {
-          console.log('subscribeTo mutation called:', { userId, authorId });
+        ) => {
           ctx.loaders.loadUsers.clear(userId);
-          return ctx.prisma.subscribersOnAuthors.create({
+          await ctx.prisma.subscribersOnAuthors.create({
             data: {
               subscriberId: userId,
               authorId: authorId,
             },
-          }).then(() => {
-            return ctx.prisma.user.findUnique({ where: { id: userId } });
-          }).catch(error => {
-            console.error('subscribeTo error:', error);
-            throw error;
           });
         },
       },
@@ -319,7 +313,6 @@ export const schema = new GraphQLSchema({
           { userId, authorId }: { userId: string; authorId: string },
           ctx: GraphQLContext,
         ) => {
-          console.log('unsubscribeFrom mutation called:', { userId, authorId });
           ctx.loaders.loadUsers.clear(userId);
           await ctx.prisma.subscribersOnAuthors.delete({
             where: {
@@ -328,12 +321,7 @@ export const schema = new GraphQLSchema({
                 authorId,
               },
             },
-          }).catch(error => {
-            console.error('unsubscribeFrom error:', error);
-            throw error;
           });
-
-          return null;
         },
       },
     },
