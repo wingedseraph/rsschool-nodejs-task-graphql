@@ -22,6 +22,7 @@ import { PostType } from './types/posts.types.js';
 import { ProfileType } from './types/profiles.types.js';
 import { UserType } from './types/user.types.js';
 import { UUIDType } from './types/uuid.js';
+
 export const schema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'RootQueryType',
@@ -128,7 +129,7 @@ export const schema = new GraphQLSchema({
         resolve: (
           _source,
           { dto }: { dto: { name: string; balance: number } },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) => {
           return ctx.prisma.user.create({ data: dto });
         },
@@ -139,7 +140,7 @@ export const schema = new GraphQLSchema({
         resolve: (
           _source,
           { dto }: { dto: { authorId: string; title: string; content: string } },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) => {
           return ctx.prisma.post.create({ data: dto });
         },
@@ -159,7 +160,7 @@ export const schema = new GraphQLSchema({
               yearOfBirth: number;
             };
           },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) => {
           return ctx.prisma.profile.create({ data: dto });
         },
@@ -201,7 +202,7 @@ export const schema = new GraphQLSchema({
         resolve(
           _source,
           { id, dto }: { id: string; dto: { name: string; balance: number } },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) {
           ctx.loaders.loadUsers.clear(id);
           return ctx.prisma.user.update({ where: { id }, data: dto });
@@ -213,7 +214,7 @@ export const schema = new GraphQLSchema({
           id: { type: new GraphQLNonNull(UUIDType) },
           dto: { type: new GraphQLNonNull(ChangePostInput) },
         },
-        resolve(_source, { id, dto }: { id: string; dto: { title: string; content: string } }, ctx: GraphQLContext,) {
+        resolve(_source, { id, dto }: { id: string; dto: { title: string; content: string } }, ctx: GraphQLContext) {
           return ctx.prisma.post.update({ where: { id }, data: dto });
         },
       },
@@ -232,7 +233,7 @@ export const schema = new GraphQLSchema({
             id: string;
             dto: { isMale: boolean; yearOfBirth: number; memberTypeId: string };
           },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) {
           return ctx.prisma.profile.update({ where: { id }, data: dto });
         },
@@ -246,7 +247,7 @@ export const schema = new GraphQLSchema({
         resolve: async (
           _source,
           { userId, authorId }: { userId: string; authorId: string },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) => {
           ctx.loaders.loadUsers.clear(userId);
           await ctx.prisma.subscribersOnAuthors.create({
@@ -263,7 +264,7 @@ export const schema = new GraphQLSchema({
         resolve: async (
           _source,
           { userId, authorId }: { userId: string; authorId: string },
-          ctx: GraphQLContext,
+          ctx: GraphQLContext
         ) => {
           ctx.loaders.loadUsers.clear(userId);
           await ctx.prisma.subscribersOnAuthors.delete({
