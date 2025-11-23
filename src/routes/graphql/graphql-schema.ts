@@ -192,7 +192,6 @@ export const schema = new GraphQLSchema({
           await ctx.prisma.user.delete({
             where: { id },
           });
-          return true;
         },
       },
       deleteProfile: {
@@ -205,7 +204,6 @@ export const schema = new GraphQLSchema({
           await ctx.prisma.profile.delete({
             where: { id },
           });
-          return true;
         },
       },
       deletePost: {
@@ -218,7 +216,6 @@ export const schema = new GraphQLSchema({
           await ctx.prisma.post.delete({
             where: { id },
           });
-          return true;
         },
       },
       subscribeTo: {
